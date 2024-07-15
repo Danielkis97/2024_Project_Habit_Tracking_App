@@ -1,0 +1,86 @@
+@startuml
+package "HabitTrackerApp" {
+    package "core" {
+        class Habit {
+            - name: str
+            - start_date: datetime
+            - log: list[datetime]
+            - periodicity: str
+            __init__(name: str, start_date: datetime, log: list[datetime], periodicity: str)
+            calculate_streak(): int
+            log_entry(date: datetime): void
+        }
+    }
+
+    package "storage" {
+        class Database {
+            - db_file: str
+            - habits: list[Habit]
+            __init__(db_file: str)
+            load_db(): list[Habit]
+            save_db(): void
+            get_all_habits(): list[Habit]
+            get_habit(name: str): Habit
+            add_habit(habit: Habit): void
+            delete_habit(name: str): void
+            get_habits_by_periodicity(periodicity: str): list[Habit]
+            get_longest_streak_all_habits(): tuple[int, str]
+            get_longest_streak_for_habit(name: str): int
+        }
+    }
+
+    package "cli" {
+        object Main_script {
+            add_habit(db: Database): void
+            view_habits(db: Database): void
+            analyze_habits(db: Database): void
+            log_entry(db: Database): void
+            delete_habit(db: Database): void
+        }
+
+        object Analyze {
+            analyze_habits(): void
+            analyze_specific_habit(db: Database): void
+            list_habits_by_periodicity(db: Database): void
+            longest_streak_for_habit(db: Database): void
+        }
+    }
+
+    package "test" {
+        class TestHabit {
+            test_calculate_streak_daily(): void
+            test_calculate_streak_weekly(): void
+            test_log_entry_daily(): void
+            test_log_entry_weekly(): void
+        }
+
+        class TestDatabase {
+            test_add_habit(): void
+            test_delete_habit(): void
+            test_get_habits_by_periodicity(): void
+            test_get_longest_streak_all_habits(): void
+            test_get_longest_streak_for_habit(): void
+            test_save_db(): void
+            test_load_db(): void
+        }
+
+        class TestAnalyze {
+            test_analyze_habits(): void
+            test_analyze_specific_habit(): void
+            test_list_habits_by_periodicity(): void
+            test_longest_streak_for_habit(): void
+        }
+    }
+
+    Main_script -down-> Habit : uses
+    Main_script -down-> Database : uses
+    Main_script -down-> Analyze : uses
+
+    TestHabit -down-> Habit : tests
+    TestDatabase -down-> Database : tests
+    TestDatabase -down-> Habit : tests
+    TestAnalyze -down-> Analyze : tests
+
+    Database "1" *-down- "0..*" Habit : manages
+}
+@enduml
